@@ -1,36 +1,29 @@
 * {
     box-sizing: border-box;
-
-    /* touch-action: none; */
-
-    /* user-select: none; */
 }
 
 body {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 4vh;
     height: 100vh;
     margin: 0;
     font-family: Arial, sans-serif;
     background-color: #111;
     color: #f0f0f0;
-
-    flex-direction: column;
-    gap: 4vh;
-
     overflow: auto;
 }
 
 #mode {
     font-size: 8vh;
     font-weight: bold;
-    /* text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); */
 }
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(5);
+    grid-template-columns: repeat(5, 1fr);
     border: 2px solid #444;
     border-radius: 8px;
     height: 100%;
@@ -46,7 +39,6 @@ body {
 }
 
 .cell:hover {
-    /* transform: scale(1.05); */
     border-color: silver;
 }
 
@@ -57,8 +49,9 @@ body {
 
 .setting {
     display: flex;
-    gap: 2vh;
     align-items: center;
+    gap: 2vh;
+    width: 100vw;
 }
 
 .setting input,
@@ -89,15 +82,31 @@ body {
     display: inline-block;
     font-size: 5vh;
     width: 16vh;
-    height: 50vh; /* 高さを制限 */
+    height: 50vh;
     overflow: auto;
+}
+
+.inputs {
+    display: flex;
+    width: 100%;
+}
+
+.inputs input {
+    width: 50%;
+}
+
+.buttons {
+    display: flex;
+}
+
+.buttons button {
+    font-size: 2.5vh;
 }
 
 @media (max-width: 768px) {
     body {
         padding: 6vh 0;
         gap: 4vh;
-
         height: 100%;
     }
 
@@ -106,8 +115,8 @@ body {
     }
 
     #area {
-        align-items: center;
         flex-direction: column;
+        align-items: center;
     }
 
     .grid {
@@ -119,8 +128,7 @@ body {
         flex-direction: column;
     }
 
-    .setting input,
-    .setting button {
+    .setting input {
         font-size: 3vh;
         padding: 0.5vh;
     }

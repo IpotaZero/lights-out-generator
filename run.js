@@ -1,68 +1,83 @@
 const grid = document.getElementById("grid")
 const button = document.getElementById("mode")
+const setButton = document.getElementById("set")
 
-const set = document.getElementById("set")
-
-button.onclick = () => {
-    if (mode === "reverse") {
-        mode = "write"
-        button.textContent = "mode:" + mode
-    } else if (mode === "write") {
-        mode = "reverse"
-        button.textContent = "mode:" + mode
-    }
-}
-
-set.onclick = () => {
-    const [row, col] = document.querySelectorAll(".setting input")
-
-    console.log(row, col)
-    generateCells(row.value, col.value)
-}
+const random = document.getElementById("random")
+const random2 = document.getElementById("random-2")
 
 let mode = "reverse"
 let gridSize = [5, 5]
-
-// Create the grid
 let cells = []
 
-function generateCells(ROW, COL) {
-    gridSize = [ROW, COL]
+// モード切り替え
+button.onclick = () => {
+    mode = mode === "reverse" ? "write" : "reverse"
+    button.textContent = `mode: ${mode}`
+}
 
-    document.getElementById("clicked").innerHTML = ""
+// グリッドサイズ設定
+setButton.onclick = () => {
+    const [rowInput, colInput] = document.querySelectorAll(".setting input")
+    generateGrid(Number(rowInput.value), Number(colInput.value))
+}
 
+random.onclick = () => {
+    cells.forEach((cell) => {
+        if (Math.random() < 0.5) {
+            cell.click()
+        }
+    })
+}
+
+random2.onclick = () => {
+    cells.forEach((cell) => {
+        cell.classList.toggle("on", Math.random() < 0.5)
+    })
+}
+
+// 初期化
+generateGrid(...gridSize)
+
+// グリッド生成
+function generateGrid(rows, cols) {
+    gridSize = [rows, cols]
     cells = []
-    grid.innerHTML = "" // Clear the grid
+    grid.innerHTML = "" // グリッドをクリア
+    document.getElementById("clicked").innerHTML = "" // クリック履歴をクリア
 
-    grid.style.gridTemplateColumns = `repeat(${COL}, 1fr)`
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`
 
-    for (let row = 0; row < ROW; row++) {
-        for (let col = 0; col < COL; col++) {
-            const cell = document.createElement("div")
-            cell.classList.add("cell")
-            cell.dataset.row = row
-            cell.dataset.col = col
-            cell.addEventListener("click", () => {
-                if (mode === "reverse") {
-                    toggleLights(row, col)
-                } else if (mode === "write") {
-                    toggleCell(row, col)
-                }
-            })
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const cell = createCell(row, col)
             grid.appendChild(cell)
             cells.push(cell)
         }
     }
 }
 
-// Initialize the grid
-generateCells(...gridSize)
+// セル生成
+function createCell(row, col) {
+    const cell = document.createElement("div")
+    cell.classList.add("cell")
+    cell.dataset.row = row
+    cell.dataset.col = col
+    cell.addEventListener("click", () => handleCellClick(row, col))
+    return cell
+}
 
-// Toggle lights
+// セルクリック時の処理
+function handleCellClick(row, col) {
+    if (mode === "reverse") {
+        toggleLights(row, col)
+    } else if (mode === "write") {
+        toggleCell(row, col)
+    }
+}
+
+// ライトの切り替え
 function toggleLights(row, col) {
-    const clicked = document.getElementById("clicked")
-    if (clicked.innerHTML !== "") clicked.innerHTML += ", "
-    clicked.innerHTML += `[${row}, ${col}]`
+    logClickedCell(row, col)
 
     for (let r = Math.max(row - 1, 0); r < Math.min(row + 2, gridSize[0]); r++) {
         for (let c = Math.max(col - 1, 0); c < Math.min(col + 2, gridSize[1]); c++) {
@@ -71,8 +86,26 @@ function toggleLights(row, col) {
     }
 }
 
+// セルの状態を切り替え
 function toggleCell(row, col) {
-    if (row < 0 || row >= gridSize[0] || col < 0 || col >= gridSize[1]) return
-    const cell = cells.find((cell) => cell.dataset["row"] == row && cell.dataset["col"] == col)
-    cell?.classList.toggle("on")
+    if (isValidCell(row, col)) {
+        const cell = getCell(row, col)
+        cell?.classList.toggle("on")
+    }
+}
+
+// セルが有効か確認
+function isValidCell(row, col) {
+    return row >= 0 && row < gridSize[0] && col >= 0 && col < gridSize[1]
+}
+
+// セルを取得
+function getCell(row, col) {
+    return cells.find((cell) => cell.dataset.row == row && cell.dataset.col == col)
+}
+
+// クリックされたセルを記録
+function logClickedCell(row, col) {
+    const clicked = document.getElementById("clicked")
+    clicked.innerHTML += clicked.innerHTML ? `, [${row}, ${col}]` : `[${row}, ${col}]`
 }
