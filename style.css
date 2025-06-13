@@ -2,13 +2,17 @@
     box-sizing: border-box;
 }
 
+html,
+body {
+    height: 100%;
+}
+
 body {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 4vh;
-    height: 100vh;
     margin: 0;
     font-family: Arial, sans-serif;
     background-color: #111;
@@ -48,6 +52,8 @@ body {
 }
 
 .setting {
+    bottom: 0;
+    position: absolute;
     display: flex;
     align-items: center;
     gap: 2vh;
@@ -91,10 +97,13 @@ body {
 .inputs {
     display: flex;
     width: 100%;
+
+    justify-content: center;
 }
 
 .inputs input {
     width: 50%;
+    max-width: 32vh;
 }
 
 .buttons {
@@ -105,8 +114,23 @@ body {
     font-size: 2.5vh;
 }
 
-footer {
+header {
+    position: absolute;
+    display: flex;
+
+    top: 0;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 10vh;
+
     & #copy-url {
+        position: absolute;
+
+        left: 2vh;
+
         font-size: 4vh;
 
         &:active {
@@ -115,9 +139,21 @@ footer {
     }
 }
 
+.copied {
+    left: 12vh;
+
+    position: absolute;
+
+    opacity: 0;
+
+    &.display {
+        opacity: 1;
+        transition: opacity 1s ease-out;
+    }
+}
+
 @media (max-width: 768px) {
     body {
-        padding: 6vh 0;
         gap: 4vh;
         height: 100%;
     }
@@ -132,7 +168,7 @@ footer {
     }
 
     .grid {
-        width: 75vw;
+        width: 85vw;
         height: fit-content;
     }
 

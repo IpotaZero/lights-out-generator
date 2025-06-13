@@ -12,6 +12,12 @@ copyButton.onclick = () => {
     const url = encodeBoardToURL(board)
 
     navigator.clipboard.writeText(url)
+
+    const copied = document.querySelector(".copied")
+    copied.classList.remove("display")
+    requestAnimationFrame(() => {
+        copied.classList.add("display")
+    })
 }
 
 // ページが読み込まれたときにクエリから盤面を生成する関数
