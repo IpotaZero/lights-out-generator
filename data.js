@@ -6,7 +6,7 @@ copyButton.onclick = () => {
     const board = {
         row: gridSize[0],
         col: gridSize[1],
-        cells: cells.map((cell) => +cell.classList.contains("on")),
+        cells: cells.map((cell) => +cell.classList.contains("on")).join(""),
     }
 
     const url = encodeBoardToURL(board)
@@ -31,9 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
     gridSize = [board.row, board.col]
 
     generateGrid(...gridSize)
-
-    board.cells.forEach((cell, i) => {
-        if (cell === 1) {
+    ;[...board.cells].forEach((cell, i) => {
+        if (cell === "1") {
             cells[i].classList.toggle("on", true)
         }
     })
