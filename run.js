@@ -23,6 +23,10 @@ setButton.onclick = () => {
 
 random.onclick = () => {
     cells.forEach((cell) => {
+        cell.classList.remove("on")
+    })
+
+    cells.forEach((cell) => {
         if (Math.random() < 0.5) {
             cell.click()
         }
