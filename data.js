@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function encodeBoardToURL(board) {
     const jsonString = JSON.stringify(board) // JSON文字列に変換
     const base64String = btoa(jsonString) // Base64エンコード
-    return `http://127.0.0.1:5501/index.html?board=${encodeURIComponent(base64String)}`
+    return `https://ipotazero.github.io/lights-out-generator/?board=${encodeURIComponent(base64String)}`
 }
 
 // URLから盤面情報をデコードする関数
