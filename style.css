@@ -154,12 +154,12 @@ header {
 
 @media (max-width: 768px) {
     body {
-        gap: 4vh;
+        gap: 2vh;
         height: 100%;
     }
 
     #mode {
-        font-size: 6vh;
+        font-size: 4vh;
     }
 
     #area {
