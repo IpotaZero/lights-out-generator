@@ -5,14 +5,16 @@ const setButton = document.getElementById("set")
 const random = document.getElementById("random")
 const random2 = document.getElementById("random-2")
 
-let mode = "reverse"
+let mode = 0
 let gridSize = [5, 5]
 let cells = []
 
 // モード切り替え
 button.onclick = () => {
-    mode = mode === "reverse" ? "write" : "reverse"
-    button.textContent = `mode: ${mode}`
+    mode++
+    mode %= 3
+
+    button.textContent = `mode: ${["square", "cross", "point"][mode]}`
 }
 
 // グリッドサイズ設定
@@ -72,15 +74,17 @@ function createCell(row, col) {
 
 // セルクリック時の処理
 function handleCellClick(row, col) {
-    if (mode === "reverse") {
-        toggleLights(row, col)
-    } else if (mode === "write") {
+    if (mode === 0) {
+        toggleLightsSquare(row, col)
+    } else if (mode === 1) {
+        toggleLightsCross(row, col)
+    } else if (mode === 2) {
         toggleCell(row, col)
     }
 }
 
 // ライトの切り替え
-function toggleLights(row, col) {
+function toggleLightsSquare(row, col) {
     logClickedCell(row, col)
 
     for (let r = Math.max(row - 1, 0); r < Math.min(row + 2, gridSize[0]); r++) {
@@ -88,6 +92,16 @@ function toggleLights(row, col) {
             toggleCell(r, c)
         }
     }
+}
+
+function toggleLightsCross(row, col) {
+    logClickedCell(row, col)
+
+    toggleCell(row, col)
+    toggleCell(row - 1, col)
+    toggleCell(row + 1, col)
+    toggleCell(row, col - 1)
+    toggleCell(row, col + 1)
 }
 
 // セルの状態を切り替え
