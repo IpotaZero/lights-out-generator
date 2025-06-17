@@ -1,144 +1,146 @@
-const grid = document.getElementById("grid")
-const button = document.getElementById("mode")
-const setButton = document.getElementById("set")
+class LightsOutGame {
+    constructor(gridElement, buttonElement, setButtonElement, randomButtons) {
+        this.grid = gridElement
+        this.modeButton = buttonElement
+        this.setButton = setButtonElement
+        this.randomButtons = randomButtons
+        this.mode = 0
+        this.gridSize = [5, 5]
+        this.cells = []
 
-const random0 = document.getElementById("random-0")
-const random1 = document.getElementById("random-1")
-const random2 = document.getElementById("random-2")
+        this.init()
+    }
 
-let mode = 0
-let gridSize = [5, 5]
-let cells = []
+    init() {
+        this.modeButton.onclick = () => this.changeMode()
+        this.setButton.onclick = () => this.setGridSize()
+        this.randomButtons[0].onclick = () => this.randomMode(0)
+        this.randomButtons[1].onclick = () => this.randomMode(1)
+        this.randomButtons[2].onclick = () => this.randomToggle()
 
-// モード切り替え
-button.onclick = () => {
-    mode++
-    mode %= 3
-}
+        this.generateGrid(...this.gridSize)
+    }
 
-// グリッドサイズ設定
-setButton.onclick = () => {
-    const [rowInput, colInput] = document.querySelectorAll(".setting input")
-    generateGrid(Number(rowInput.value), Number(colInput.value))
-}
+    changeMode() {
+        this.mode = (this.mode + 1) % 3
+        this.updateModeLabel()
+    }
 
-function updateModeLabel() {
-    button.textContent = `mode: ${["square", "cross", "point"][mode]}`
-}
+    setGridSize() {
+        const [rowInput, colInput] = document.querySelectorAll(".setting input")
+        this.generateGrid(Number(rowInput.value), Number(colInput.value))
+    }
 
-random0.onclick = () => {
-    mode = 0
-    updateModeLabel()
-    randomClick()
-}
+    updateModeLabel() {
+        this.modeButton.textContent = `mode: ${["square", "cross", "point"][this.mode]}`
+    }
 
-random1.onclick = () => {
-    mode = 1
-    updateModeLabel()
-    randomClick()
-}
+    randomMode(mode) {
+        this.mode = mode
+        this.updateModeLabel()
+        this.randomClick()
+    }
 
-const randomClick = () => {
-    cells.forEach((cell) => {
-        cell.classList.remove("on")
-    })
+    randomClick() {
+        this.cells.forEach((cell) => cell.classList.remove("on"))
+        this.cells.forEach((cell) => {
+            if (Math.random() < 0.5) {
+                cell.click()
+            }
+        })
+    }
 
-    cells.forEach((cell) => {
-        if (Math.random() < 0.5) {
-            cell.click()
+    randomToggle() {
+        this.cells.forEach((cell) => {
+            cell.classList.toggle("on", Math.random() < 0.5)
+        })
+    }
+
+    generateGrid(rows, cols) {
+        this.gridSize = [rows, cols]
+        this.cells = []
+        this.grid.innerHTML = "" // Clear grid
+        document.getElementById("clicked").innerHTML = "" // Clear click history
+
+        this.grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`
+
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const cell = this.createCell(row, col)
+                this.grid.appendChild(cell)
+                this.cells.push(cell)
+            }
         }
-    })
-}
+    }
 
-random2.onclick = () => {
-    cells.forEach((cell) => {
-        cell.classList.toggle("on", Math.random() < 0.5)
-    })
+    createCell(row, col) {
+        const cell = document.createElement("div")
+        cell.classList.add("cell")
+        cell.dataset.row = row
+        cell.dataset.col = col
+        cell.addEventListener("click", () => this.handleCellClick(row, col))
+        return cell
+    }
+
+    handleCellClick(row, col) {
+        if (this.mode === 0) {
+            this.toggleLightsSquare(row, col)
+        } else if (this.mode === 1) {
+            this.toggleLightsCross(row, col)
+        } else if (this.mode === 2) {
+            this.toggleCell(row, col)
+        }
+    }
+
+    toggleLightsSquare(row, col) {
+        this.logClickedCell(row, col)
+
+        for (let r = Math.max(row - 1, 0); r < Math.min(row + 2, this.gridSize[0]); r++) {
+            for (let c = Math.max(col - 1, 0); c < Math.min(col + 2, this.gridSize[1]); c++) {
+                this.toggleCell(r, c)
+            }
+        }
+    }
+
+    toggleLightsCross(row, col) {
+        this.logClickedCell(row, col)
+
+        this.toggleCell(row, col)
+        this.toggleCell(row - 1, col)
+        this.toggleCell(row + 1, col)
+        this.toggleCell(row, col - 1)
+        this.toggleCell(row, col + 1)
+    }
+
+    toggleCell(row, col) {
+        if (this.isValidCell(row, col)) {
+            const cell = this.getCell(row, col)
+            cell?.classList.toggle("on")
+        }
+    }
+
+    isValidCell(row, col) {
+        return row >= 0 && row < this.gridSize[0] && col >= 0 && col < this.gridSize[1]
+    }
+
+    getCell(row, col) {
+        return this.cells.find((cell) => cell.dataset.row == row && cell.dataset.col == col)
+    }
+
+    logClickedCell(row, col) {
+        const clicked = document.getElementById("clicked")
+        clicked.innerHTML += clicked.innerHTML ? `, [${row}, ${col}]` : `[${row}, ${col}]`
+    }
 }
 
 // 初期化
-generateGrid(...gridSize)
+const grid = document.getElementById("grid")
+const button = document.getElementById("mode")
+const setButton = document.getElementById("set")
+const randomButtons = [
+    document.getElementById("random-0"),
+    document.getElementById("random-1"),
+    document.getElementById("random-2"),
+]
 
-// グリッド生成
-function generateGrid(rows, cols) {
-    gridSize = [rows, cols]
-    cells = []
-    grid.innerHTML = "" // グリッドをクリア
-    document.getElementById("clicked").innerHTML = "" // クリック履歴をクリア
-
-    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`
-
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-            const cell = createCell(row, col)
-            grid.appendChild(cell)
-            cells.push(cell)
-        }
-    }
-}
-
-// セル生成
-function createCell(row, col) {
-    const cell = document.createElement("div")
-    cell.classList.add("cell")
-    cell.dataset.row = row
-    cell.dataset.col = col
-    cell.addEventListener("click", () => handleCellClick(row, col))
-    return cell
-}
-
-// セルクリック時の処理
-function handleCellClick(row, col) {
-    if (mode === 0) {
-        toggleLightsSquare(row, col)
-    } else if (mode === 1) {
-        toggleLightsCross(row, col)
-    } else if (mode === 2) {
-        toggleCell(row, col)
-    }
-}
-
-// ライトの切り替え
-function toggleLightsSquare(row, col) {
-    logClickedCell(row, col)
-
-    for (let r = Math.max(row - 1, 0); r < Math.min(row + 2, gridSize[0]); r++) {
-        for (let c = Math.max(col - 1, 0); c < Math.min(col + 2, gridSize[1]); c++) {
-            toggleCell(r, c)
-        }
-    }
-}
-
-function toggleLightsCross(row, col) {
-    logClickedCell(row, col)
-
-    toggleCell(row, col)
-    toggleCell(row - 1, col)
-    toggleCell(row + 1, col)
-    toggleCell(row, col - 1)
-    toggleCell(row, col + 1)
-}
-
-// セルの状態を切り替え
-function toggleCell(row, col) {
-    if (isValidCell(row, col)) {
-        const cell = getCell(row, col)
-        cell?.classList.toggle("on")
-    }
-}
-
-// セルが有効か確認
-function isValidCell(row, col) {
-    return row >= 0 && row < gridSize[0] && col >= 0 && col < gridSize[1]
-}
-
-// セルを取得
-function getCell(row, col) {
-    return cells.find((cell) => cell.dataset.row == row && cell.dataset.col == col)
-}
-
-// クリックされたセルを記録
-function logClickedCell(row, col) {
-    const clicked = document.getElementById("clicked")
-    clicked.innerHTML += clicked.innerHTML ? `, [${row}, ${col}]` : `[${row}, ${col}]`
-}
+const game = new LightsOutGame(grid, button, setButton, randomButtons)
