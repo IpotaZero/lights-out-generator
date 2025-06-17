@@ -2,7 +2,8 @@ const grid = document.getElementById("grid")
 const button = document.getElementById("mode")
 const setButton = document.getElementById("set")
 
-const random = document.getElementById("random")
+const random0 = document.getElementById("random-0")
+const random1 = document.getElementById("random-1")
 const random2 = document.getElementById("random-2")
 
 let mode = 0
@@ -13,8 +14,6 @@ let cells = []
 button.onclick = () => {
     mode++
     mode %= 3
-
-    button.textContent = `mode: ${["square", "cross", "point"][mode]}`
 }
 
 // グリッドサイズ設定
@@ -23,7 +22,29 @@ setButton.onclick = () => {
     generateGrid(Number(rowInput.value), Number(colInput.value))
 }
 
-random.onclick = () => {
+function updateModeLabel() {
+    button.textContent = `mode: ${["square", "cross", "point"][mode]}`
+}
+
+random0.onclick = () => {
+    mode = 0
+    updateModeLabel()
+
+    cells.forEach((cell) => {
+        cell.classList.remove("on")
+    })
+
+    cells.forEach((cell) => {
+        if (Math.random() < 0.5) {
+            cell.click()
+        }
+    })
+}
+
+random1.onclick = () => {
+    mode = 1
+    updateModeLabel()
+
     cells.forEach((cell) => {
         cell.classList.remove("on")
     })
