@@ -180,6 +180,8 @@ class LightsOutGame {
                     if (row < rows - 1) pattern[(row + 1) * cols + col] = 1
                     if (col > 0) pattern[row * cols + (col - 1)] = 1
                     if (col < cols - 1) pattern[row * cols + (col + 1)] = 1
+                } else if (this.mode === 2) {
+                    pattern[row * cols + col] = 1
                 }
 
                 matrix.push(pattern)
@@ -217,10 +219,6 @@ class LightsOutGame {
         this.mode = mode
         this.updateModeLabel()
         this.randomClick()
-
-        this.cells.forEach((cell) => {
-            cell.classList.remove("answer")
-        })
     }
 
     randomClick() {
@@ -236,6 +234,9 @@ class LightsOutGame {
     }
 
     randomToggle() {
+        this.cells.forEach((cell) => {
+            cell.classList.remove("answer")
+        })
         this.cells.forEach((cell) => {
             cell.classList.toggle("on", Math.random() < 0.5)
         })
