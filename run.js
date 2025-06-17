@@ -29,22 +29,16 @@ function updateModeLabel() {
 random0.onclick = () => {
     mode = 0
     updateModeLabel()
-
-    cells.forEach((cell) => {
-        cell.classList.remove("on")
-    })
-
-    cells.forEach((cell) => {
-        if (Math.random() < 0.5) {
-            cell.click()
-        }
-    })
+    randomClick()
 }
 
 random1.onclick = () => {
     mode = 1
     updateModeLabel()
+    randomClick()
+}
 
+const randomClick = () => {
     cells.forEach((cell) => {
         cell.classList.remove("on")
     })
