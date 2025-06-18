@@ -49,6 +49,7 @@ class LightsOutGame {
     }
 
     changeMode() {
+        Answer.reset()
         this.mode = (this.mode + 1) % 3
         this.updateModeLabel()
     }
