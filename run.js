@@ -12,181 +12,30 @@ class LightsOutGame {
     }
 
     getAnswer() {
-        this.cells.forEach((cell) => {
-            cell.classList.remove("answer")
-        })
+        Answer.reset()
 
-        const b = this.cells.map((cell) => (cell.classList.contains("on") ? 1 : 0))
-
-        const M = this.createPreset(...this.gridSize)
-
-        // console.log(math.det(M))
-
-        const lu = this.LU(M)
-
-        // console.log(lu)
-
-        // const trueLP = math.lup(M)
-
-        // console.log(trueLP)
-
-        // lu.L.forEach((row, i) => {
-        //     if (row.join() !== trueLP.L[i].join()) console.log(i)
-        // })
+        const b = this.getBoardVector()
 
         try {
-            const p = Array.from({ length: lu.P.length }, (_, i) => {
-                const row = Array(lu.P.length).fill(0)
-                row[lu.P[i]] = 1
-                return row
-            })
-
-            // console.log(math.multiply(math.inv(p), math.multiply(lu.L, lu.U)))
-
-            const Pb = math.multiply(p, b)
-
-            const invL = math.inv(lu.L)
-
-            const y = math.multiply(invL, Pb).map((num) => (num + 100) % 2)
-
-            // console.log(lu.L)
-            // console.log(invL)
-            // console.log(lu.U, y)
-
-            const answer = this.resolve(lu.U, y)
+            const { answer, ker } = Resolver.resolve(b, this.gridSize, this.mode)
 
             if (answer instanceof Error) {
                 throw answer
             }
 
-            // console.log(answer)
+            Answer.xp = answer.map((num) => Math.abs(Math.round(num)) % 2)
+            Answer.ker = ker
+            Answer.kerNum = 0
 
-            answer.forEach((value, i) => {
-                if (Math.abs(Math.round(value) % 2) !== 0) {
-                    this.cells[i].classList.add("answer")
-                }
-            })
+            Answer.set()
         } catch (error) {
             alert("分かんないっピ。。。")
             console.error(error)
         }
     }
 
-    resolve(u, y) {
-        const l = y.length
-        const x = Array(l).fill(0)
-
-        for (let i = 0; i < l; i++) {
-            const m = l - i - 1
-
-            const allZero = u[m].every((num) => num === 0)
-            if (allZero) {
-                if (y[m] !== 0) {
-                    return new Error("解けない!")
-                }
-
-                continue
-            }
-
-            if (u[m][m] === 0) continue
-
-            x[m] = (y[m] - this.dot(u[m].slice(m + 1), x.slice(m + 1))) / u[m][m]
-        }
-
-        return x
-    }
-
-    dot(x, y) {
-        if (x.length !== y.length) {
-            throw new Error("Vectors must be of the same length")
-        }
-        return x.reduce((sum, xi, i) => sum + xi * y[i], 0)
-    }
-
-    LU(A) {
-        const n = A.length
-        const L = Array.from({ length: n }, (_, i) => Array(n).fill(0))
-        const U = A.map((row) => row.slice())
-        const P = [...Array(n).keys()] // Pivot tracking
-
-        // console.log(A)
-
-        for (let k = 0; k < n; k++) {
-            // Find pivot
-            const pivot = U.slice(k).findIndex((row) => row[k] === 1) + k
-
-            if (pivot === -1 + k) {
-                // console.log(k)
-                // throw new Error("Matrix is singular in GF(2)")
-                L[k][k] = 1
-
-                continue
-            }
-
-            // Swap rows if needed
-            if (pivot !== k) {
-                // console.log(`${k}行と${pivot}行を入れ替え`)
-                ;[U[k], U[pivot]] = [U[pivot], U[k]]
-                ;[L[k], L[pivot]] = [L[pivot], L[k]]
-                ;[P[k], P[pivot]] = [P[pivot], P[k]]
-            }
-
-            L[k][k] = 1
-
-            // 簡約化していく
-            for (let i = k + 1; i < n; i++) {
-                if (U[i][k] === 1) {
-                    // console.log(`${i}行目に${k}行と同じく1の奴を発見`)
-
-                    L[i][k] = 1
-
-                    // i行目にk行目を加える
-                    for (let j = k; j < n; j++) {
-                        U[i][j] ^= U[k][j]
-                    }
-                }
-            }
-
-            // console.log(JSON.stringify(U))
-        }
-
-        return { L, U, P }
-    }
-
-    createPreset(rows, cols) {
-        const matrix = []
-
-        for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-                const pattern = Array(rows * cols).fill(0)
-
-                // Toggle the clicked cell
-                // pattern[row * cols + col] = 1
-
-                // Toggle the surrounding cells based on the current mode
-                if (this.mode === 0) {
-                    // Square mode
-                    for (let r = Math.max(row - 1, 0); r < Math.min(row + 2, rows); r++) {
-                        for (let c = Math.max(col - 1, 0); c < Math.min(col + 2, cols); c++) {
-                            pattern[r * cols + c] = 1
-                        }
-                    }
-                } else if (this.mode === 1) {
-                    // Cross mode
-                    pattern[row * cols + col] = 1
-                    if (row > 0) pattern[(row - 1) * cols + col] = 1
-                    if (row < rows - 1) pattern[(row + 1) * cols + col] = 1
-                    if (col > 0) pattern[row * cols + (col - 1)] = 1
-                    if (col < cols - 1) pattern[row * cols + (col + 1)] = 1
-                } else if (this.mode === 2) {
-                    pattern[row * cols + col] = 1
-                }
-
-                matrix.push(pattern)
-            }
-        }
-
-        return matrix
+    getBoardVector() {
+        return this.cells.map((cell) => (cell.classList.contains("on") ? 1 : 0))
     }
 
     init() {
@@ -220,10 +69,12 @@ class LightsOutGame {
     }
 
     randomClick() {
+        Answer.reset()
+
         this.cells.forEach((cell) => {
-            cell.classList.remove("answer")
             cell.classList.remove("on")
         })
+
         this.cells.forEach((cell) => {
             if (Math.random() < 0.5) {
                 cell.click()
@@ -232,9 +83,7 @@ class LightsOutGame {
     }
 
     randomToggle() {
-        this.cells.forEach((cell) => {
-            cell.classList.remove("answer")
-        })
+        Answer.reset()
         this.cells.forEach((cell) => {
             cell.classList.toggle("on", Math.random() < 0.5)
         })
@@ -331,4 +180,247 @@ const game = new LightsOutGame(grid, button, setButton, randomButtons)
 
 document.getElementById("resolve").onclick = () => {
     game.getAnswer()
+}
+
+document.getElementById("left").onclick = () => {
+    Answer.previous()
+}
+
+document.getElementById("right").onclick = () => {
+    Answer.next()
+}
+
+const Answer = {
+    xp: null,
+    ker: null,
+    kerNum: 0,
+
+    solutionNo: document.getElementById("solution-no"),
+
+    set() {
+        this.reset()
+
+        const cells = [...grid.children]
+
+        const p = this.kerNum.toString(2).padStart(this.ker.length, "0")
+
+        console.log(p)
+
+        const x = this.ker
+            .filter((_, i) => p[i] === "1")
+            .reduce((y, base) => y.map((x, i) => (x + base[i]) % 2), this.xp)
+
+        x.forEach((value, i) => {
+            if (value !== 0) {
+                cells[i].classList.add("answer")
+            }
+        })
+
+        this.solutionNo.innerText = "Solution No." + (this.kerNum + 1) + "/" + 2 ** this.ker.length
+    },
+
+    reset() {
+        const cells = [...grid.children]
+        cells.forEach((cell) => {
+            cell.classList.remove("answer")
+        })
+    },
+
+    next() {
+        this.kerNum = (this.kerNum + 1) % 2 ** this.ker.length
+        this.set()
+    },
+
+    previous() {
+        this.kerNum = (this.kerNum + 2 ** this.ker.length - 1) % 2 ** this.ker.length
+        this.set()
+    },
+}
+
+class Resolver {
+    static resolve(b, gridSize, mode) {
+        const M = this.#createPreset(...gridSize, mode)
+
+        // PM = LU
+        const lu = this.#LU(M)
+
+        const Pb = lu.P.map((i) => b[i])
+
+        const invL = math.inv(lu.L)
+
+        const y = math.multiply(invL, Pb).map((num) => (num + 100) % 2)
+
+        const answer = this.#resolveUx(lu.U, y)
+
+        return { answer, ker: this.#getKernel(lu.U) }
+    }
+
+    static #getKernel(U) {
+        const n = U.length
+        const m = U[0].length
+        const pivotCols = []
+        const isPivot = Array(m).fill(false)
+
+        // ステップ1: ピボット列を探す
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < m; j++) {
+                if (U[i][j] === 1 && !isPivot[j]) {
+                    pivotCols.push(j)
+                    isPivot[j] = true
+                    break
+                }
+            }
+        }
+
+        // ステップ2: 自由変数の列インデックスを取得
+        const freeCols = []
+        for (let j = 0; j < m; j++) {
+            if (!isPivot[j]) freeCols.push(j)
+        }
+
+        // ステップ3: 各自由変数に対して基底ベクトルを構成
+        const basis = []
+
+        for (const freeCol of freeCols) {
+            const x = Array(m).fill(0)
+            x[freeCol] = 1
+
+            // 後退代入
+            for (let i = n - 1; i >= 0; i--) {
+                let sum = 0
+                let pivot = -1
+                for (let j = 0; j < m; j++) {
+                    if (U[i][j] === 1) {
+                        if (pivot === -1) pivot = j
+                        else sum ^= U[i][j] & x[j]
+                    }
+                }
+                if (pivot !== -1 && !freeCols.includes(pivot)) {
+                    x[pivot] = sum // mod 2 なのでそのまま代入
+                }
+            }
+            basis.push(x)
+        }
+
+        return basis
+    }
+
+    static #createPreset(rows, cols, mode) {
+        const matrix = []
+
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const pattern = this.#createZeroMatrix(rows, cols)
+
+                // Toggle the surrounding cells based on the current mode
+                if (mode === 0) {
+                    // Square mode
+                    for (let r = Math.max(row - 1, 0); r < Math.min(row + 2, rows); r++) {
+                        for (let c = Math.max(col - 1, 0); c < Math.min(col + 2, cols); c++) {
+                            pattern[r][c] = 1
+                        }
+                    }
+                } else if (mode === 1) {
+                    // Cross mode
+                    pattern[row][col] = 1
+                    if (row > 0) pattern[row - 1][col] = 1
+                    if (row < rows - 1) pattern[row + 1][col] = 1
+                    if (col > 0) pattern[row][col - 1] = 1
+                    if (col < cols - 1) pattern[row][col + 1] = 1
+                } else if (mode === 2) {
+                    // Point mode
+                    pattern[row][col] = 1
+                }
+
+                matrix.push(pattern.flat(1))
+            }
+        }
+
+        return matrix
+    }
+
+    static #resolveUx(u, y) {
+        const l = y.length
+        const x = Array(l).fill(0)
+
+        for (let i = 0; i < l; i++) {
+            const m = l - i - 1
+
+            const allZero = u[m].every((num) => num === 0)
+            if (allZero) {
+                if (y[m] !== 0) {
+                    return new Error("解けない!")
+                }
+
+                continue
+            }
+
+            if (u[m][m] === 0) continue
+
+            x[m] = (y[m] - this.#dot(u[m].slice(m + 1), x.slice(m + 1))) / u[m][m]
+        }
+
+        return x
+    }
+
+    static #LU(A) {
+        const n = A.length
+        const L = Array.from({ length: n }, (_, i) => Array(n).fill(0))
+        const U = A.map((row) => row.slice())
+        const P = [...Array(n).keys()] // Pivot tracking
+
+        // console.log(A)
+
+        for (let k = 0; k < n; k++) {
+            // Find pivot
+            const pivot = U.slice(k).findIndex((row) => row[k] === 1) + k
+
+            if (pivot === -1 + k) {
+                // console.log(k)
+                // throw new Error("Matrix is singular in GF(2)")
+                L[k][k] = 1
+
+                continue
+            }
+
+            // Swap rows if needed
+            if (pivot !== k) {
+                // console.log(`${k}行と${pivot}行を入れ替え`)
+                ;[U[k], U[pivot]] = [U[pivot], U[k]]
+                ;[L[k], L[pivot]] = [L[pivot], L[k]]
+                ;[P[k], P[pivot]] = [P[pivot], P[k]]
+            }
+
+            L[k][k] = 1
+
+            // 簡約化していく
+            for (let i = k + 1; i < n; i++) {
+                if (U[i][k] === 1) {
+                    // console.log(`${i}行目に${k}行と同じく1の奴を発見`)
+
+                    L[i][k] = 1
+
+                    // i行目にk行目を加える
+                    for (let j = k; j < n; j++) {
+                        U[i][j] ^= U[k][j]
+                    }
+                }
+            }
+
+            // console.log(JSON.stringify(U))
+        }
+
+        return { L, U, P }
+    }
+
+    static #dot(x, y) {
+        if (x.length !== y.length) {
+            throw new Error("Vectors must be of the same length")
+        }
+        return x.reduce((sum, xi, i) => sum + xi * y[i], 0)
+    }
+
+    static #createZeroMatrix(rows, cols) {
+        return Array.from({ length: rows }, () => Array(cols).fill(0))
+    }
 }

@@ -54,6 +54,11 @@
         font-weight: bold;
         font-size: 4vh;
     }
+
+    & #solution-no {
+        text-align: center;
+        font-size: 4vh;
+    }
 }
 
 @media (min-width: 767px) {
