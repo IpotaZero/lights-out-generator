@@ -12,7 +12,7 @@ class LightsOutGame {
     }
 
     getAnswer() {
-        Answer.reset()
+        Answer.resetBoardClass()
 
         const b = this.getBoardVector()
 
@@ -49,12 +49,6 @@ class LightsOutGame {
     }
 
     changeMode() {
-        Answer.xp = null
-        Answer.ker = null
-        Answer.kerNum = 0
-        Answer.reset()
-        Answer.solutionNo.innerText = "Solution No.0/0"
-
         this.mode = (this.mode + 1) % 3
         this.updateModeLabel()
     }
@@ -69,13 +63,14 @@ class LightsOutGame {
     }
 
     randomMode(mode) {
+        Answer.reset()
         this.mode = mode
         this.updateModeLabel()
         this.randomClick()
     }
 
     randomClick() {
-        Answer.reset()
+        Answer.resetBoardClass()
 
         this.cells.forEach((cell) => {
             cell.classList.remove("on")
@@ -89,7 +84,7 @@ class LightsOutGame {
     }
 
     randomToggle() {
-        Answer.reset()
+        Answer.resetBoardClass()
         this.cells.forEach((cell) => {
             cell.classList.toggle("on", Math.random() < 0.5)
         })
@@ -204,7 +199,7 @@ const Answer = {
     solutionNo: document.getElementById("solution-no"),
 
     set() {
-        this.reset()
+        this.resetBoardClass()
 
         const cells = [...grid.children]
 
@@ -225,11 +220,19 @@ const Answer = {
         this.solutionNo.innerText = "Solution No." + (this.kerNum + 1) + "/" + 2 ** this.ker.length
     },
 
-    reset() {
+    resetBoardClass() {
         const cells = [...grid.children]
         cells.forEach((cell) => {
             cell.classList.remove("answer")
         })
+    },
+
+    reset() {
+        this.xp = null
+        this.ker = null
+        this.kerNum = 0
+        this.resetBoardClass()
+        this.solutionNo.innerText = "Solution No.0/0"
     },
 
     next() {
