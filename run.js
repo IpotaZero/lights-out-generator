@@ -414,14 +414,14 @@ class Resolver {
         // console.log(A)
 
         for (let k = 0; k < n; k++) {
-            console.log(
-                "\t" +
-                    [...Array(n).keys()].join("\t") +
-                    "\n" +
-                    U.map((row, i) => `${i}:\t` + row.join("\t")).join("\n"),
-            )
+            // console.log(
+            //     "\t" +
+            //         [...Array(n).keys()].join("\t") +
+            //         "\n" +
+            //         U.map((row, i) => `${i}:\t` + row.join("\t")).join("\n"),
+            // )
 
-            console.log(`${k}列目開始`)
+            // console.log(`${k}列目開始`)
 
             // Find pivot
             // k行以降の主成分がある行を探す
@@ -429,12 +429,12 @@ class Resolver {
 
             // 見つからなかったら
             if (pivot === -1 + k - g) {
-                console.log(`${k - g}行目以降にpivotを発見できなかったにゃ。。。`)
+                // console.log(`${k - g}行目以降にpivotを発見できなかったにゃ。。。`)
 
                 // k行目を一番下の行に挿入する
                 const lastRowIndex = n - 1
                 if (k - g !== lastRowIndex) {
-                    console.log(`${k - g}行目を一番下の行に挿入するにゃ`)
+                    // console.log(`${k - g}行目を一番下の行に挿入するにゃ`)
                     const rowToMove = U.splice(k - g, 1)[0]
                     const lToMove = L.splice(k - g, 1)[0]
                     const pToMove = P.splice(k - g, 1)[0]
@@ -448,11 +448,11 @@ class Resolver {
                 continue
             }
 
-            console.log(`${pivot}行目${k}列目にpivotを発見`)
+            // console.log(`${pivot}行目${k}列目にpivotを発見`)
 
             // Swap rows if needed
             if (pivot !== k - g) {
-                console.log(`${k - g}行と${pivot}行を入れ替え`)
+                // console.log(`${k - g}行と${pivot}行を入れ替え`)
                 ;[U[k - g], U[pivot]] = [U[pivot], U[k - g]]
                 ;[L[k - g], L[pivot]] = [L[pivot], L[k - g]]
                 ;[P[k - g], P[pivot]] = [P[pivot], P[k - g]]
@@ -461,7 +461,7 @@ class Resolver {
             // 簡約化していく
             for (let i = k - g + 1; i < n; i++) {
                 if (U[i][k] === 1) {
-                    console.log(`${i}行目に${k - g}行目と同じく1の奴を発見`)
+                    // console.log(`${i}行目に${k - g}行目と同じく1の奴を発見`)
 
                     L[i][k - g] = 1
 
@@ -470,7 +470,7 @@ class Resolver {
                         U[i][j] ^= U[k - g][j]
                     }
 
-                    console.log(`U[${i}]:\t` + U[i].join("\t"))
+                    // console.log(`U[${i}]:\t` + U[i].join("\t"))
                 }
             }
         }
@@ -482,9 +482,9 @@ class Resolver {
         console.assert(this.#checkUpperTri(U), "上三角じゃあないにゃ！")
         console.assert(this.#checkUnitLowerTri(L), "単位下三角じゃあないにゃ！")
 
-        console.log(U.map((row) => row.join("\t")).join("\n"))
-        console.log(L.map((row) => row.join("\t")).join("\n"))
-        console.log(P.join("\t"))
+        // console.log(U.map((row) => row.join("\t")).join("\n"))
+        // console.log(L.map((row) => row.join("\t")).join("\n"))
+        // console.log(P.join("\t"))
 
         return { L, U, P }
     }
