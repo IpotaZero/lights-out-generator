@@ -4,9 +4,9 @@ const copyButton = document.getElementById("copy-url")
 
 copyButton.onclick = () => {
     const board = {
-        row: gridSize[0],
-        col: gridSize[1],
-        cells: cells.map((cell) => +cell.classList.contains("on")).join(""),
+        row: game.gridSize[0],
+        col: game.gridSize[1],
+        cells: game.cells.map((cell) => +cell.classList.contains("on")).join(""),
     }
 
     const url = encodeBoardToURL(board)
@@ -28,12 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     grid.innerHTML = ""
 
-    gridSize = [board.row, board.col]
+    game.gridSize = [board.row, board.col]
 
     generateGrid(...gridSize)
     ;[...board.cells].forEach((cell, i) => {
         if (cell === "1") {
-            cells[i].classList.toggle("on", true)
+            game.cells[i].classList.toggle("on", true)
         }
     })
 })

@@ -55,6 +55,8 @@ class LightsOutGame {
     }
 
     setGridSize() {
+        Answer.reset()
+
         const [rowInput, colInput] = document.querySelectorAll(".setting input")
         this.generateGrid(Number(rowInput.value), Number(colInput.value))
     }
@@ -223,7 +225,7 @@ const Answer = {
 
         const p = this.kerNum.toString(2).padStart(this.ker.length, "0")
 
-        console.log(p)
+        // console.log(p)
 
         const x = this.ker
             .filter((_, i) => p[i] === "1")
@@ -235,7 +237,7 @@ const Answer = {
             }
         })
 
-        this.solutionNo.innerText = "Solution No." + (this.kerNum + 1) + "/" + 2 ** this.ker.length
+        this.solutionNo.innerHTML = "Solution No." + (this.kerNum + 1) + "/" + 2 + `<sup>${this.ker.length}</sup>`
     },
 
     resetBoardClass() {
@@ -283,12 +285,12 @@ class Resolver {
     }
 
     static #getKernel(U) {
-        console.log(U.map((row) => row.join("\t")).join("\n"))
+        // console.log(U.map((row) => row.join("\t")).join("\n"))
 
         // rank = 16のはずなのに何かおかしい LU 分解の時点でおかしい
         const rank = U.filter((row) => row.some((value) => value !== 0)).length
 
-        console.log(rank)
+        // console.log(rank)
 
         const n = U.length
         const m = U[0].length
@@ -306,7 +308,7 @@ class Resolver {
             }
         }
 
-        console.log(pivotCols)
+        // console.log(pivotCols)
 
         // ステップ2: 自由変数の列インデックスを取得
         const freeCols = []
@@ -402,56 +404,87 @@ class Resolver {
     }
 
     static #LU(A) {
-        console.log(A.map((row) => row.join("\t")).join("\n"))
-
         const n = A.length
         const L = this.#createZeroMatrix(n, n)
         const U = A.map((row) => row.slice())
         const P = [...Array(n).keys()] // Pivot tracking
 
+        let g = 0
+
         // console.log(A)
 
         for (let k = 0; k < n; k++) {
-            // Find pivot
-            const pivot = U.slice(k).findIndex((row) => row[k] === 1) + k
+            console.log(
+                "\t" +
+                    [...Array(n).keys()].join("\t") +
+                    "\n" +
+                    U.map((row, i) => `${i}:\t` + row.join("\t")).join("\n"),
+            )
 
-            if (pivot === -1 + k) {
-                // console.log(k)
-                // throw new Error("Matrix is singular in GF(2)")
-                L[k][k] = 1
+            console.log(`${k}列目開始`)
+
+            // Find pivot
+            // k行以降の主成分がある行を探す
+            const pivot = U.slice(k - g).findIndex((row) => row[k] === 1) + k - g
+
+            // 見つからなかったら
+            if (pivot === -1 + k - g) {
+                console.log(`${k - g}行目以降にpivotを発見できなかったにゃ。。。`)
+
+                // k行目を一番下の行に挿入する
+                const lastRowIndex = n - 1
+                if (k - g !== lastRowIndex) {
+                    console.log(`${k - g}行目を一番下の行に挿入するにゃ`)
+                    const rowToMove = U.splice(k - g, 1)[0]
+                    const lToMove = L.splice(k - g, 1)[0]
+                    const pToMove = P.splice(k - g, 1)[0]
+                    U.push(rowToMove)
+                    L.push(lToMove)
+                    P.push(pToMove)
+                }
+
+                g++
 
                 continue
             }
 
+            console.log(`${pivot}行目${k}列目にpivotを発見`)
+
             // Swap rows if needed
-            if (pivot !== k) {
-                // console.log(`${k}行と${pivot}行を入れ替え`)
-                ;[U[k], U[pivot]] = [U[pivot], U[k]]
-                ;[L[k], L[pivot]] = [L[pivot], L[k]]
-                ;[P[k], P[pivot]] = [P[pivot], P[k]]
+            if (pivot !== k - g) {
+                console.log(`${k - g}行と${pivot}行を入れ替え`)
+                ;[U[k - g], U[pivot]] = [U[pivot], U[k - g]]
+                ;[L[k - g], L[pivot]] = [L[pivot], L[k - g]]
+                ;[P[k - g], P[pivot]] = [P[pivot], P[k - g]]
             }
 
-            L[k][k] = 1
-
             // 簡約化していく
-            for (let i = k + 1; i < n; i++) {
+            for (let i = k - g + 1; i < n; i++) {
                 if (U[i][k] === 1) {
-                    // console.log(`${i}行目に${k}行と同じく1の奴を発見`)
+                    console.log(`${i}行目に${k - g}行目と同じく1の奴を発見`)
 
-                    L[i][k] = 1
+                    L[i][k - g] = 1
 
                     // i行目にk行目を加える
                     for (let j = k; j < n; j++) {
-                        U[i][j] ^= U[k][j]
+                        U[i][j] ^= U[k - g][j]
                     }
+
+                    console.log(`U[${i}]:\t` + U[i].join("\t"))
                 }
             }
-
-            // console.log(JSON.stringify(U))
         }
+
+        L.forEach((row, i) => {
+            row[i] = 1
+        })
 
         console.assert(this.#checkUpperTri(U), "上三角じゃあないにゃ！")
         console.assert(this.#checkUnitLowerTri(L), "単位下三角じゃあないにゃ！")
+
+        console.log(U.map((row) => row.join("\t")).join("\n"))
+        console.log(L.map((row) => row.join("\t")).join("\n"))
+        console.log(P.join("\t"))
 
         return { L, U, P }
     }

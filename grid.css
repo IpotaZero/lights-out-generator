@@ -20,6 +20,10 @@
     height: fit-content;
     width: calc(50vw + 20vh);
     max-width: 85vw;
+
+    & :nth-child(even) {
+        opacity: 0.95;
+    }
 }
 
 .cell {
@@ -59,6 +63,8 @@
     gap: 2vh;
 
     & button {
+        width: 35vh;
+
         font-size: 4vh;
         font-weight: bold;
     }
