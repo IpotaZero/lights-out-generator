@@ -18,7 +18,7 @@ class LightsOutGame {
 
         const b = this.cells.map((cell) => (cell.classList.contains("on") ? 1 : 0))
 
-        const M = this.createPreset()
+        const M = this.createPreset(...this.gridSize)
 
         // console.log(math.det(M))
 
@@ -153,9 +153,7 @@ class LightsOutGame {
         return { L, U, P }
     }
 
-    createPreset() {
-        const rows = this.gridSize[0]
-        const cols = this.gridSize[1]
+    createPreset(rows, cols) {
         const matrix = []
 
         for (let row = 0; row < rows; row++) {
