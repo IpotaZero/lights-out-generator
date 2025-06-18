@@ -201,6 +201,14 @@ document.getElementById("right").onclick = () => {
     Answer.next()
 }
 
+document.getElementById("reverse").onclick = () => {
+    Answer.reset()
+
+    game.cells.forEach((cell) => {
+        cell.classList.toggle("on")
+    })
+}
+
 const Answer = {
     xp: null,
     ker: null,
@@ -275,6 +283,13 @@ class Resolver {
     }
 
     static #getKernel(U) {
+        console.log(U.map((row) => row.join("\t")).join("\n"))
+
+        // rank = 16のはずなのに何かおかしい LU 分解の時点でおかしい
+        const rank = U.filter((row) => row.some((value) => value !== 0)).length
+
+        console.log(rank)
+
         const n = U.length
         const m = U[0].length
         const pivotCols = []
@@ -290,6 +305,8 @@ class Resolver {
                 }
             }
         }
+
+        console.log(pivotCols)
 
         // ステップ2: 自由変数の列インデックスを取得
         const freeCols = []
@@ -320,6 +337,8 @@ class Resolver {
             }
             basis.push(x)
         }
+
+        console.assert(n - basis.length === rank, "次元定理に矛盾するにゃ！")
 
         return basis
     }
@@ -383,8 +402,10 @@ class Resolver {
     }
 
     static #LU(A) {
+        console.log(A.map((row) => row.join("\t")).join("\n"))
+
         const n = A.length
-        const L = Array.from({ length: n }, (_, i) => Array(n).fill(0))
+        const L = this.#createZeroMatrix(n, n)
         const U = A.map((row) => row.slice())
         const P = [...Array(n).keys()] // Pivot tracking
 
@@ -429,7 +450,38 @@ class Resolver {
             // console.log(JSON.stringify(U))
         }
 
+        console.assert(this.#checkUpperTri(U), "上三角じゃあないにゃ！")
+        console.assert(this.#checkUnitLowerTri(L), "単位下三角じゃあないにゃ！")
+
         return { L, U, P }
+    }
+
+    static #checkUpperTri(U) {
+        const rows = U.length
+
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < i; j++) {
+                if (U[i][j] !== 0) {
+                    return false // Not an upper triangular matrix
+                }
+            }
+        }
+        return true // It is an upper triangular matrix
+    }
+
+    static #checkUnitLowerTri(L) {
+        const cols = L.length
+
+        for (let i = 0; i < cols; i++) {
+            if (L[i][i] !== 1) return false
+
+            for (let j = i + 1; j < cols; j++) {
+                if (L[i][j] !== 0) {
+                    return false // Not an lower triangular matrix
+                }
+            }
+        }
+        return true // It is an lower triangular matrix
     }
 
     static #dot(x, y) {

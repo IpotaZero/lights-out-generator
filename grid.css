@@ -53,9 +53,15 @@
     }
 }
 
-#mode {
-    font-size: 4vh;
-    font-weight: bold;
+#mode-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+
+    & button {
+        font-size: 4vh;
+        font-weight: bold;
+    }
 }
 
 #resolver {
