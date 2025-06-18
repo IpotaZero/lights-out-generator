@@ -49,6 +49,12 @@ class LightsOutGame {
     }
 
     changeMode() {
+        Answer.xp = null
+        Answer.ker = null
+        Answer.kerNum = 0
+        Answer.reset()
+        Answer.solutionNo.innerText = "Solution No.0/0"
+
         this.mode = (this.mode + 1) % 3
         this.updateModeLabel()
     }
