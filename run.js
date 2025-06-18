@@ -85,7 +85,8 @@ class LightsOutGame {
     }
 
     randomToggle() {
-        Answer.resetBoardClass()
+        Answer.reset()
+
         this.cells.forEach((cell) => {
             cell.classList.toggle("on", Math.random() < 0.5)
         })
@@ -185,10 +186,18 @@ document.getElementById("resolve").onclick = () => {
 }
 
 document.getElementById("left").onclick = () => {
+    if (!Answer.xp) {
+        game.getAnswer()
+        return
+    }
     Answer.previous()
 }
 
 document.getElementById("right").onclick = () => {
+    if (!Answer.xp) {
+        game.getAnswer()
+        return
+    }
     Answer.next()
 }
 
