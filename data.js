@@ -17,6 +17,9 @@ copyButton.onclick = () => {
     copied.classList.remove("display")
     requestAnimationFrame(() => {
         copied.classList.add("display")
+        copied.ontransitionend = () => {
+            copied.classList.remove("display")
+        }
     })
 }
 

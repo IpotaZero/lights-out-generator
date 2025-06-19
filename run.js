@@ -337,14 +337,13 @@ class Resolver {
     }
 
     static resolve(b, gridSize, mode) {
-        const M = this.#createPreset(...gridSize, mode)
+        const M = this.createPreset(...gridSize, mode)
 
         // PM = LU
-        const lu = this.#LU(M)
+        const lu = this.LU(M)
 
         const invL = this.#inv(lu.L)
 
-        const P = this.#permutationMatrix(lu.P)
         const Pb = lu.P.map((i) => b[i])
 
         // console.log(
@@ -381,15 +380,6 @@ class Resolver {
         // console.log(answer)
 
         return { answer, ker: this.#getKernel(lu.U) }
-    }
-
-    static #permutationMatrix(P) {
-        const n = P.length
-        const Pmat = Array.from({ length: n }, () => Array(n).fill(0))
-        for (let i = 0; i < n; i++) {
-            Pmat[i][P[i]] = 1
-        }
-        return Pmat
     }
 
     static #getKernel(U) {
@@ -453,7 +443,7 @@ class Resolver {
         return basis
     }
 
-    static #createPreset(rows, cols, mode) {
+    static createPreset(rows, cols, mode) {
         const matrix = []
 
         for (let row = 0; row < rows; row++) {
@@ -479,7 +469,7 @@ class Resolver {
                     if (col > 0) pattern[row][col - 1] = 1
                     if (col < cols - 1) pattern[row][col + 1] = 1
                 } else if (mode === 3) {
-                    // Point mode
+                    // X mode
                     pattern[row][col] = 1
                     if (row > 0 && col > 0) pattern[row - 1][col - 1] = 1
                     if (row < rows - 1 && col > 0) pattern[row + 1][col - 1] = 1
@@ -549,7 +539,7 @@ class Resolver {
         return invL
     }
 
-    static #LU(A) {
+    static LU(A) {
         const n = A.length
         const L = this.#createZeroMatrix(n, n)
         const U = A.map((row) => row.slice())
@@ -664,16 +654,17 @@ class Resolver {
 }
 
 function test() {
-    const vecs = [...Array(2 ** 15).keys()].map((i) => [...i.toString(2).padStart(15, "0")].map(Number))
+    Array(100)
+        .keys()
+        .forEach((i) => {
+            if (i === 0) return
 
-    vecs.forEach((y) => {
-        if (!Answer.ker.every((b) => Resolver.dot(y, b) % 2 === 0)) return
+            const M = Resolver.createPreset(i, i, 3)
 
-        // すべての基底との内積が0なら
+            const { U } = Resolver.LU(M)
 
-        const { answer } = Resolver.resolve(y, game.gridSize, game.mode)
-
-        console.log("y:", y)
-        console.log("answer:", answer)
-    })
+            if (!U[U.length - 1].every((cell) => cell == 0)) {
+                console.log(i)
+            }
+        })
 }

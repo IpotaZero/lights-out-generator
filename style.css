@@ -23,61 +23,6 @@ body {
     overflow: auto;
 }
 
-.setting {
-    bottom: 0;
-    position: absolute;
-    display: flex;
-    align-items: center;
-    gap: 2vh;
-    width: 100vw;
-    flex-direction: column;
-}
-
-.setting input,
-.setting button {
-    font-size: 3vh;
-    padding: 0.5vh;
-    border: 1px solid #555;
-    border-radius: 4px;
-    background-color: #222;
-    color: #f0f0f0;
-    transition: background-color 0.1s, color 0.1s;
-}
-
-.setting input:focus,
-.setting button:hover {
-    background-color: #333;
-    color: #fff;
-    outline: none;
-}
-
-#clicked {
-    display: inline-block;
-    font-size: 3vh;
-    width: 80vw;
-    height: 12vh;
-    overflow: auto;
-}
-
-.inputs {
-    display: flex;
-    width: 100vw;
-    justify-content: center;
-}
-
-.inputs input {
-    width: 50%;
-    max-width: 32vh;
-}
-
-.buttons {
-    display: flex;
-}
-
-.buttons button {
-    font-size: 2.3vh;
-}
-
 header {
     position: absolute;
     display: flex;
@@ -96,16 +41,16 @@ header {
             opacity: 0.5;
         }
     }
-}
 
-.copied {
-    left: 12vh;
-    position: absolute;
-    opacity: 0;
-
-    &.display {
-        opacity: 1;
+    & .copied {
+        left: 12vh;
+        position: absolute;
+        opacity: 0;
         transition: opacity 1s ease-out;
+
+        &.display {
+            opacity: 1;
+        }
     }
 }
 
@@ -113,29 +58,5 @@ header {
     body {
         gap: 4vh;
         height: 100%;
-    }
-
-    #mode,
-    #resolve {
-        font-size: 8vh;
-    }
-
-    #area {
-        flex-direction: row;
-    }
-
-    .setting {
-        flex-direction: column;
-    }
-
-    .setting input {
-        font-size: 4vh;
-        padding: 0.5vh 1vh;
-    }
-
-    #clicked {
-        font-size: 5vh;
-        width: 16vh;
-        height: 50vh;
     }
 }
