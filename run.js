@@ -4,7 +4,7 @@ class LightsOutGame {
         this.modeButton = buttonElement
         this.setButton = setButtonElement
         this.randomButtons = randomButtons
-        this.mode = 0
+        this.mode = 1
         this.gridSize = [5, 5]
         this.cells = []
 
@@ -41,16 +41,17 @@ class LightsOutGame {
     init() {
         this.modeButton.onclick = () => this.changeMode()
         this.setButton.onclick = () => this.setGridSize()
-        this.randomButtons[0].onclick = () => this.randomMode(0)
+        this.randomButtons[0].onclick = () => this.randomToggle()
         this.randomButtons[1].onclick = () => this.randomMode(1)
-        this.randomButtons[2].onclick = () => this.randomToggle()
+        this.randomButtons[2].onclick = () => this.randomMode(2)
+        this.randomButtons[3].onclick = () => this.randomMode(3)
 
         this.generateGrid(...this.gridSize)
     }
 
     changeMode() {
         Answer.reset()
-        this.mode = (this.mode + 1) % 3
+        this.mode = (this.mode + 1) % 4
         this.updateModeLabel()
     }
 
@@ -62,7 +63,7 @@ class LightsOutGame {
     }
 
     updateModeLabel() {
-        this.modeButton.textContent = `mode: ${["square", "cross", "point"][this.mode]}`
+        this.modeButton.textContent = `mode: ${["point", "square", "cross", "X"][this.mode]}`
     }
 
     randomMode(mode) {
@@ -122,11 +123,13 @@ class LightsOutGame {
 
     handleCellClick(row, col) {
         if (this.mode === 0) {
-            this.toggleLightsSquare(row, col)
-        } else if (this.mode === 1) {
-            this.toggleLightsCross(row, col)
-        } else if (this.mode === 2) {
             this.toggleCell(row, col)
+        } else if (this.mode === 1) {
+            this.toggleLightsSquare(row, col)
+        } else if (this.mode === 2) {
+            this.toggleLightsCross(row, col)
+        } else if (this.mode === 3) {
+            this.toggleLightsX(row, col)
         }
     }
 
@@ -157,6 +160,16 @@ class LightsOutGame {
         }
     }
 
+    toggleLightsX(row, col) {
+        this.logClickedCell(row, col)
+
+        this.toggleCell(row, col)
+        this.toggleCell(row - 1, col - 1)
+        this.toggleCell(row - 1, col + 1)
+        this.toggleCell(row + 1, col - 1)
+        this.toggleCell(row + 1, col + 1)
+    }
+
     isValidCell(row, col) {
         return row >= 0 && row < this.gridSize[0] && col >= 0 && col < this.gridSize[1]
     }
@@ -179,6 +192,7 @@ const randomButtons = [
     document.getElementById("random-0"),
     document.getElementById("random-1"),
     document.getElementById("random-2"),
+    document.getElementById("random-3"),
 ]
 
 const game = new LightsOutGame(grid, button, setButton, randomButtons)
@@ -448,22 +462,29 @@ class Resolver {
 
                 // Toggle the surrounding cells based on the current mode
                 if (mode === 0) {
+                    // Point mode
+                    pattern[row][col] = 1
+                } else if (mode === 1) {
                     // Square mode
                     for (let r = Math.max(row - 1, 0); r < Math.min(row + 2, rows); r++) {
                         for (let c = Math.max(col - 1, 0); c < Math.min(col + 2, cols); c++) {
                             pattern[r][c] = 1
                         }
                     }
-                } else if (mode === 1) {
+                } else if (mode === 2) {
                     // Cross mode
                     pattern[row][col] = 1
                     if (row > 0) pattern[row - 1][col] = 1
                     if (row < rows - 1) pattern[row + 1][col] = 1
                     if (col > 0) pattern[row][col - 1] = 1
                     if (col < cols - 1) pattern[row][col + 1] = 1
-                } else if (mode === 2) {
+                } else if (mode === 3) {
                     // Point mode
                     pattern[row][col] = 1
+                    if (row > 0 && col > 0) pattern[row - 1][col - 1] = 1
+                    if (row < rows - 1 && col > 0) pattern[row + 1][col - 1] = 1
+                    if (row > 0 && col < cols - 1) pattern[row - 1][col + 1] = 1
+                    if (row < rows - 1 && col < cols - 1) pattern[row + 1][col + 1] = 1
                 }
 
                 matrix.push(pattern.flat(1))
@@ -504,7 +525,7 @@ class Resolver {
 
             // console.log(`${m + g}列目にpivot発見`)
 
-            x[m + g] = (y[m] - this.#dot(u[m].slice(m + g + 1), x.slice(m + g + 1))) / u[m][m + g]
+            x[m + g] = (y[m] - this.dot(u[m].slice(m + g + 1), x.slice(m + g + 1))) / u[m][m + g]
             // console.log(`x[${m + g}]=${x[m + g]}`)
         }
 
@@ -630,7 +651,7 @@ class Resolver {
         return true // It is an lower triangular matrix
     }
 
-    static #dot(x, y) {
+    static dot(x, y) {
         if (x.length !== y.length) {
             throw new Error("Vectors must be of the same length")
         }
@@ -640,4 +661,19 @@ class Resolver {
     static #createZeroMatrix(rows, cols) {
         return Array.from({ length: rows }, () => Array(cols).fill(0))
     }
+}
+
+function test() {
+    const vecs = [...Array(2 ** 15).keys()].map((i) => [...i.toString(2).padStart(15, "0")].map(Number))
+
+    vecs.forEach((y) => {
+        if (!Answer.ker.every((b) => Resolver.dot(y, b) % 2 === 0)) return
+
+        // すべての基底との内積が0なら
+
+        const { answer } = Resolver.resolve(y, game.gridSize, game.mode)
+
+        console.log("y:", y)
+        console.log("answer:", answer)
+    })
 }
