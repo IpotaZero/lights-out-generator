@@ -267,21 +267,115 @@ const Answer = {
 }
 
 class Resolver {
+    static testResolveUx() {
+        this.#test0()
+        this.#test1()
+        this.#test2()
+    }
+
+    static #test0() {
+        const u = [
+            [1, 1, 0, 0],
+            [0, 1, 1, 1],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ]
+
+        const x = [1, 1, 0, 0]
+        const y = math.multiply(u, x)
+
+        console.log(this.#resolveUx(u, y), x)
+        console.log(this.#getKernel(u))
+    }
+
+    static #test1() {
+        const u = [
+            [1, 1, 0, 0, 0],
+            [0, 1, 1, 1, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0],
+        ]
+
+        const x = [1, 1, 0, 1, 0]
+        const y = math.multiply(u, x)
+
+        console.log(this.#resolveUx(u, y), x)
+        console.log(this.#getKernel(u))
+    }
+
+    static #test2() {
+        const u = [
+            [1, 1, 0, 0, 0],
+            [0, 1, 1, 1, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0],
+        ]
+
+        const x = [1, 1, 0, 1, 1]
+        const y = math.multiply(u, x)
+
+        console.log(u)
+        console.log(y.map((cell) => cell % 2))
+        console.log(this.#resolveUx(u, y), x)
+        console.log(this.#getKernel(u))
+    }
+
     static resolve(b, gridSize, mode) {
         const M = this.#createPreset(...gridSize, mode)
 
         // PM = LU
         const lu = this.#LU(M)
 
+        const invL = this.#inv(lu.L)
+
+        const P = this.#permutationMatrix(lu.P)
         const Pb = lu.P.map((i) => b[i])
 
-        const invL = math.inv(lu.L)
+        // console.log(
+        //     "LLinv\n" +
+        //         math
+        //             .multiply(invL, lu.L)
+        //             .map((row) => row.join("\t"))
+        //             .join("\n"),
+        // )
+
+        // console.log(
+        //     "LU\n" +
+        //         math
+        //             .multiply(lu.L, lu.U)
+        //             .map((row) => row.join("\t"))
+        //             .join("\n"),
+        // )
+
+        // P,L,U は正しそう
+        // invL は正しそう
 
         const y = math.multiply(invL, Pb).map((num) => (num + 100) % 2)
 
+        // console.log("P\n" + P.map((row) => row.join("\t")).join("\n"))
+        // console.log("U\n" + lu.U.map((row) => row.join("\t")).join("\n"))
+        // console.log("L\n" + lu.L.map((row) => row.join("\t")).join("\n"))
+        // console.log("invL\n" + invL.map((row) => row.join("\t")).join("\n"))
+        // console.log("A\n" + M.map((row) => row.join("\t")).join("\n"))
+        // console.log("b\n" + b.join("\n"))
+        // console.log("y\n" + y.join("\n"))
+
         const answer = this.#resolveUx(lu.U, y)
 
+        // console.log(answer)
+
         return { answer, ker: this.#getKernel(lu.U) }
+    }
+
+    static #permutationMatrix(P) {
+        const n = P.length
+        const Pmat = Array.from({ length: n }, () => Array(n).fill(0))
+        for (let i = 0; i < n; i++) {
+            Pmat[i][P[i]] = 1
+        }
+        return Pmat
     }
 
     static #getKernel(U) {
@@ -383,11 +477,19 @@ class Resolver {
         const l = y.length
         const x = Array(l).fill(0)
 
+        // console.log("U:\n" + u.map((row) => row.join("\t")).join("\n"))
+        // console.log("次元:", l)
+
         for (let i = 0; i < l; i++) {
             const m = l - i - 1
 
+            // console.log(`${m}行目開始`)
+
             const allZero = u[m].every((num) => num === 0)
+
             if (allZero) {
+                // console.log(`全て0なのでスキップ`)
+
                 if (y[m] !== 0) {
                     return new Error("解けない!")
                 }
@@ -395,12 +497,35 @@ class Resolver {
                 continue
             }
 
-            if (u[m][m] === 0) continue
+            let g = 0
+            while (u[m][m + g] === 0) {
+                g++
+            }
 
-            x[m] = (y[m] - this.#dot(u[m].slice(m + 1), x.slice(m + 1))) / u[m][m]
+            // console.log(`${m + g}列目にpivot発見`)
+
+            x[m + g] = (y[m] - this.#dot(u[m].slice(m + g + 1), x.slice(m + g + 1))) / u[m][m + g]
+            // console.log(`x[${m + g}]=${x[m + g]}`)
         }
 
         return x
+    }
+
+    static #inv(L) {
+        const n = L.length
+        const invL = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)))
+
+        for (let j = 0; j < n; j++) {
+            for (let i = j + 1; i < n; i++) {
+                if (L[i][j] === 1) {
+                    for (let k = 0; k < n; k++) {
+                        invL[i][k] ^= invL[j][k] // GF(2): 足し算は XOR
+                    }
+                }
+            }
+        }
+
+        return invL
     }
 
     static #LU(A) {
@@ -411,7 +536,7 @@ class Resolver {
 
         let g = 0
 
-        // console.log(A)
+        // console.log(A.map((row) => row.join("\t")).join("\n"))
 
         for (let k = 0; k < n; k++) {
             // console.log(
@@ -424,24 +549,12 @@ class Resolver {
             // console.log(`${k}列目開始`)
 
             // Find pivot
-            // k行以降の主成分がある行を探す
+            // k-g行以降で主成分がある行を探す
             const pivot = U.slice(k - g).findIndex((row) => row[k] === 1) + k - g
 
             // 見つからなかったら
             if (pivot === -1 + k - g) {
                 // console.log(`${k - g}行目以降にpivotを発見できなかったにゃ。。。`)
-
-                // k行目を一番下の行に挿入する
-                const lastRowIndex = n - 1
-                if (k - g !== lastRowIndex) {
-                    // console.log(`${k - g}行目を一番下の行に挿入するにゃ`)
-                    const rowToMove = U.splice(k - g, 1)[0]
-                    const lToMove = L.splice(k - g, 1)[0]
-                    const pToMove = P.splice(k - g, 1)[0]
-                    U.push(rowToMove)
-                    L.push(lToMove)
-                    P.push(pToMove)
-                }
 
                 g++
 
@@ -461,11 +574,11 @@ class Resolver {
             // 簡約化していく
             for (let i = k - g + 1; i < n; i++) {
                 if (U[i][k] === 1) {
-                    // console.log(`${i}行目に${k - g}行目と同じく1の奴を発見`)
+                    // console.log(`${i}行目に${k - g}行目を加える`)
 
                     L[i][k - g] = 1
 
-                    // i行目にk行目を加える
+                    // i行目にk-g行目を加える
                     for (let j = k; j < n; j++) {
                         U[i][j] ^= U[k - g][j]
                     }
