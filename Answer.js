@@ -38,6 +38,8 @@ const Answer = {
     solutionNo: document.getElementById("solution-no"),
 
     ready() {
+        console.log(game.mode)
+
         const M = Resolver.createPreset(...game.gridSize, game.mode)
         this.lu = Resolver.LU(M)
         this.lu.invL = Resolver.inv(this.lu.L)
@@ -123,7 +125,7 @@ const Answer = {
     },
 
     next() {
-        if (!this.xp) {
+        if (!this.xp || !this.isReady) {
             this.resolve()
         }
 
@@ -132,7 +134,7 @@ const Answer = {
     },
 
     previous() {
-        if (!this.xp) {
+        if (!this.xp || !this.isReady) {
             this.resolve()
         }
 
