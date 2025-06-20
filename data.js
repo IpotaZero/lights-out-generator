@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     game.gridSize = [board.row, board.col]
 
-    generateGrid(...gridSize)
+    game.generateGrid(...game.gridSize)
     ;[...board.cells].forEach((cell, i) => {
         if (cell === "1") {
             game.cells[i].classList.toggle("on", true)

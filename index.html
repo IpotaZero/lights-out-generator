@@ -25,6 +25,7 @@
             <div id="mode-buttons">
                 <button id="reverse">Reverse</button>
                 <button id="mode">mode: square</button>
+                <button id="resolvable">Resolvable?</button>
             </div>
 
             <div id="resolver">
@@ -33,15 +34,16 @@
                     <button id="resolve">Resolve</button>
                     <button id="right">→</button>
                 </div>
+
                 <p id="solution-no">Solution No.0/0</p>
             </div>
         </div>
 
         <div class="setting">
             <div class="inputs">
+                <button id="set">Generate</button>
                 <input type="number" placeholder="row" value="5" />
                 <input type="number" placeholder="column" value="5" />
-                <button id="set">Generate</button>
             </div>
 
             <div class="buttons">
@@ -52,7 +54,9 @@
             </div>
         </div>
 
+        <script src="dist/Resolver.js"></script>
         <script src="run.js"></script>
+        <script src="Answer.js"></script>
         <script src="data.js"></script>
     </body>
 </html>
