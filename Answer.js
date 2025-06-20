@@ -81,7 +81,7 @@ const Answer = {
             throw xp
         }
 
-        this.xp = xp
+        this.xp = xp.map((num) => (num + 100) % 2)
 
         this.set()
     },
@@ -100,7 +100,7 @@ const Answer = {
             .reduce((y, base) => y.map((x, i) => (x + base[i]) % 2), this.xp)
 
         x.forEach((value, i) => {
-            if (value !== 0) {
+            if (value % 2 !== 0) {
                 cells[i].classList.add("answer")
             }
         })
